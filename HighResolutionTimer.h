@@ -7,21 +7,30 @@
 namespace Util {
 
 /**
- * @brief The HighResolutionTimer class. Provides a simple interface to start and stop a high-resolution timer and get
- * its average running time. Currently at microsecond resolution.
+ * @brief Provides a simple interface to start and stop a high-resolution chronometer-like timer and get
+ * its average running time, its last running time or the time elapsed since it was last started. Currently at
+ * microsecond resolution.
  */
 class HighResolutionTimer
 {
-    typedef std::chrono::high_resolution_clock       Clock;
-    typedef Clock::time_point                        Reading;
-    typedef std::chrono::microseconds                Duration;
-    typedef std::chrono::duration<float, std::milli> MsDuration;
+    using Clock      = std::chrono::high_resolution_clock;
+    using Duration   = std::chrono::microseconds; //!< Resolution of the clock
+    using DurationMs = std::chrono::duration<float, std::milli>;
+    using Reading    = Clock::time_point;
 
 public:
-    HighResolutionTimer() : Start_(Clock::now()), Stop_(Clock::now()), Total_(0), Count_(0) {}
+    HighResolutionTimer()
+        : Start_(Clock::now())
+        , Stop_(Start_)
+        , Total_(0)
+        , Count_(0)
+    {
+    }
 
     inline void Reset()
     {
+        Start_ = Clock::now();
+        Stop_  = Start_;
         Total_ = Duration::zero();
         Count_ = 0;
     }
@@ -34,20 +43,31 @@ public:
     inline void Stop()
     {
         Stop_ = Clock::now();
-        Total_ += std::chrono::duration_cast<Duration>(Stop_ - Start_);
+        Total_ += getDuration<Duration>(Stop_ - Start_);
     }
 
-    inline float GetLastTimeMs() const { return std::chrono::duration_cast<MsDuration>(Stop_ - Start_).count(); }
-    inline float GetAvgTimeMs() const
-    {
-        return static_cast<float>(std::chrono::duration_cast<MsDuration>(Total_).count()) / Count_;
-    }
+    inline float GetLastTimeMs() const { return getNumTicks<DurationMs>(Stop_ - Start_); }
+    inline float GetAvgTimeMs() const { return getNumTicks<DurationMs>(Total_) / Count_; }
+    inline float GetTimeSinceLastStartMs() const { return getNumTicks<DurationMs>(Clock::now() - Start_); }
 
 private:
     Reading  Start_;
     Reading  Stop_;
-    Duration Total_;
+    Duration Total_; //!< Total time elapsed while this timer was running (not counting current, if still running)
     uint64_t Count_;
+
+private: // functions
+    template <class T, class U>
+    static inline float getNumTicks(const U& interval)
+    {
+        return getDuration<T>(interval).count();
+    }
+
+    template <class T, class U>
+    static inline T getDuration(const U& interval)
+    {
+        return std::chrono::duration_cast<T>(interval);
+    }
 };
 
 } // namespace Util
