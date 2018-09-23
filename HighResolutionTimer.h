@@ -1,5 +1,5 @@
-#ifndef HIGHRESOLUTIONTIMER_H
-#define HIGHRESOLUTIONTIMER_H
+#ifndef HIGH_RESOLUTION_TIMER_H
+#define HIGH_RESOLUTION_TIMER_H
 
 #include <chrono>
 #include <cstdint>
