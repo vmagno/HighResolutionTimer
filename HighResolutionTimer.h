@@ -4,8 +4,6 @@
 #include <chrono>
 #include <cstdint>
 
-namespace Util {
-
 /**
  * @brief Provides a simple interface to start and stop a high-resolution chronometer-like timer and get
  * its average running time, its last running time or the time elapsed since it was last started. Currently at
@@ -20,41 +18,41 @@ class HighResolutionTimer
 
 public:
     HighResolutionTimer()
-        : Start_(Clock::now())
-        , Stop_(Start_)
-        , Total_(0)
-        , Count_(0)
+        : start_(Clock::now())
+        , stop_(start_)
+        , total_(0)
+        , count_(0)
     {
     }
 
-    inline void Reset()
+    inline void reset()
     {
-        Start_ = Clock::now();
-        Stop_  = Start_;
-        Total_ = Duration::zero();
-        Count_ = 0;
+        start_ = Clock::now();
+        stop_  = start_;
+        total_ = Duration::zero();
+        count_ = 0;
     }
 
-    inline void Start()
+    inline void start()
     {
-        Start_ = Clock::now();
-        Count_++;
+        start_ = Clock::now();
+        count_++;
     }
-    inline void Stop()
+    inline void stop()
     {
-        Stop_ = Clock::now();
-        Total_ += getDuration<Duration>(Stop_ - Start_);
+        stop_ = Clock::now();
+        total_ += getDuration<Duration>(stop_ - start_);
     }
 
-    inline float GetLastTimeMs() const { return getNumTicks<DurationMs>(Stop_ - Start_); }
-    inline float GetAvgTimeMs() const { return getNumTicks<DurationMs>(Total_) / Count_; }
-    inline float GetTimeSinceLastStartMs() const { return getNumTicks<DurationMs>(Clock::now() - Start_); }
+    inline float getLastTimeMs() const { return getNumTicks<DurationMs>(stop_ - start_); }
+    inline float getAvgTimeMs() const { return getNumTicks<DurationMs>(total_) / count_; }
+    inline float getTimeSinceLastStartMs() const { return getNumTicks<DurationMs>(Clock::now() - start_); }
 
 private:
-    Reading  Start_;
-    Reading  Stop_;
-    Duration Total_; //!< Total time elapsed while this timer was running (not counting current, if still running)
-    uint64_t Count_;
+    Reading  start_;
+    Reading  stop_;
+    Duration total_; //!< Total time elapsed while this timer was running (not counting current, if still running)
+    uint64_t count_;
 
 private: // functions
     template <class T, class U>
@@ -70,6 +68,4 @@ private: // functions
     }
 };
 
-} // namespace Util
-
-#endif // HIGHRESOLUTIONTIMER_H
+#endif // HIGH_RESOLUTION_TIMER_H
