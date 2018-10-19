@@ -14,6 +14,7 @@ class HighResolutionTimer
     using Clock      = std::chrono::high_resolution_clock;
     using Duration   = std::chrono::microseconds; //!< Resolution of the clock
     using DurationMs = std::chrono::duration<float, std::milli>;
+    using DurationS  = std::chrono::duration<float, std::chrono::seconds::period>;
     using Reading    = Clock::time_point;
 
 public:
@@ -47,7 +48,15 @@ public:
     inline float getLastTimeMs() const { return getNumTicks<DurationMs>(stop_ - start_); }
     inline float getAvgTimeMs() const { return getNumTicks<DurationMs>(total_) / count_; }
     inline float getTimeSinceLastStartMs() const { return getNumTicks<DurationMs>(Clock::now() - start_); }
+    inline float getTimeSinceLastStartS() const { return getNumTicks<DurationS>(Clock::now() - start_); }
 
+    inline float getTimeAndRestartMs()
+    {
+        stop();
+        const auto time = getLastTimeMs();
+        start_          = stop_;
+        return time;
+    }
 private:
     Reading  start_;
     Reading  stop_;
